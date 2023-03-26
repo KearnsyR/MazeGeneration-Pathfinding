@@ -1,10 +1,7 @@
-class Settings:
-    def __init__(self):
-        self.screen_width = 500
-        self.screen_height = 500
-        self.grid_size = 10
-        self.total_border_width = 10
-        self.tile_size = (self.screen_width - self.total_border_width - 10) // self.grid_size
-        self.border_width = self.total_border_width // self.grid_size
-        self.square_color = (255, 255, 255)
-        self.border_color = (0, 0, 0)
+SCREEN_WIDTH = 720
+SCREEN_HEIGHT = 720
+GRID_SIZE = 10
+TILE_SIZE = 50
+BACKGROUND_COLOUR = (255,255,255)
+BORDER_COLOUR = (0,0,0)
+BORDER_WIDTH = 5

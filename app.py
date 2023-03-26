@@ -90,7 +90,7 @@ while stack:
             grid[neighbor_i][neighbor_j]['left'] = False
 
         update_screen()
-        #pygame.time.wait(50)
+        pygame.time.wait(50)
         stack.append((neighbor_i, neighbor_j))
 
 start_pos = start_end_pos(side)
