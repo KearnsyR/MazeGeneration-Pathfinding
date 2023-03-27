@@ -11,6 +11,8 @@ class Game:
         self.maze = Maze()
 
     def run(self):
+        self.maze.generate_maze()
+        pygame.display.update()
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -19,8 +21,7 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit()
                         sys.exit()
-            self.maze.generate_maze()
-            pygame.display.update()
+            
 
 if __name__ == '__main__':
     game = Game()
