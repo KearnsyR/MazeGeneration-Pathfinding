@@ -11,7 +11,9 @@ class Game:
         self.maze = Maze()
 
     def run(self):
-        self.maze.generate_maze()
+        start_pos, end_pos, grid = self.maze.generate_maze()
+        print(start_pos, end_pos,grid)
+        self.astar.astar(start_pos, end_pos, grid)
         pygame.display.update()
         while True:
             for event in pygame.event.get():
@@ -22,7 +24,6 @@ class Game:
                         pygame.quit()
                         sys.exit()
             
-
 if __name__ == '__main__':
     game = Game()
     game.run()

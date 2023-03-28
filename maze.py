@@ -27,12 +27,16 @@ class Maze:
         y = random.randint(0, GRID_SIZE-1)
         if side == 'North':
             self.grid[y][0].border_side['North'] = False
+            return (y, 0)
         elif side == 'South':
             self.grid[y][GRID_SIZE-1].border_side['South'] = False
+            return (y, GRID_SIZE-1)
         elif side == 'East':
             self.grid[GRID_SIZE-1][x].border_side['East'] = False
+            return (GRID_SIZE-1, x)
         elif side == 'West':
             self.grid[0][x].border_side['West'] = False
+            return (0, x)
     
     def generate_maze(self):
         self.renderGrid.display_grid(self.grid)
@@ -65,6 +69,7 @@ class Maze:
                 pygame.time.wait(50)
                 tile_stack.append((neighbour_x, neighbour_y))
 
-        self.get_pos(start_side)
-        self.get_pos(opposite_sides[start_side])
+        start_pos = self.get_pos(start_side)
+        end_pos = self.get_pos(opposite_sides[start_side])
         self.renderGrid.display_grid(self.grid)
+        return start_pos, end_pos, self.grid
