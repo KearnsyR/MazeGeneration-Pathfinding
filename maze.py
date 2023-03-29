@@ -4,6 +4,7 @@ import pygame
 from settings import *
 from tile import Tile
 from display_grid import DisplayGrid
+from path_finding import *
 
 class Maze:
     def __init__(self):
@@ -68,7 +69,7 @@ class Maze:
                 self.renderGrid.display_grid(self.grid)
                 pygame.time.wait(50)
                 tile_stack.append((neighbour_x, neighbour_y))
-
+        get_neighbours(self.grid)
         start_pos = self.get_pos(start_side)
         end_pos = self.get_pos(opposite_sides[start_side])
         self.renderGrid.display_grid(self.grid)
