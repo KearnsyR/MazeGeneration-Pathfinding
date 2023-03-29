@@ -9,3 +9,5 @@ class Tile:
         self.x = x
         self.y = y
         self.neighbours = []
+        self.g_score = float("inf")
+        self.f_score = float("inf")

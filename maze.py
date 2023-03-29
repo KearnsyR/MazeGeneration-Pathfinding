@@ -4,7 +4,6 @@ import pygame
 from settings import *
 from tile import Tile
 from display_grid import DisplayGrid
-from path_finding import *
 
 class Maze:
     def __init__(self):
@@ -47,6 +46,9 @@ class Maze:
         opposite_sides = {'North': 'South', 'South': 'North', 'East': 'West', 'West': 'East'}
         
         while tile_stack:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
             x, y = tile_stack.pop()
             visited_tile.add((x, y))
             unvisited_neighbours = [neighbour for neighbour in self.get_unvisited_neighbours(x, y) if neighbour not in visited_tile]
@@ -69,7 +71,6 @@ class Maze:
                 self.renderGrid.display_grid(self.grid)
                 pygame.time.wait(50)
                 tile_stack.append((neighbour_x, neighbour_y))
-        get_neighbours(self.grid)
         start_pos = self.get_pos(start_side)
         end_pos = self.get_pos(opposite_sides[start_side])
         self.renderGrid.display_grid(self.grid)

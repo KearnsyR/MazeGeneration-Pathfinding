@@ -1,5 +1,6 @@
 import pygame, sys
 from maze import Maze
+from path_finding import *
 from settings import *
 
 class Game:
@@ -12,7 +13,8 @@ class Game:
 
     def run(self):
         start_pos, end_pos, grid = self.maze.generate_maze()
-        print(start_pos, end_pos,grid)
+        get_neighbours(grid)
+        astar(start_pos, end_pos, grid)
         pygame.display.update()
         while True:
             for event in pygame.event.get():
