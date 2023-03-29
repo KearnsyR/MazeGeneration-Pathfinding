@@ -14,6 +14,8 @@ class Game:
     def run(self):
         start_pos, end_pos, grid = self.maze.generate_maze()
         get_neighbours(grid)
+        grid[start_pos[0]][start_pos[1]].type = START
+        grid[end_pos[0]][end_pos[1]].type = END
         astar(start_pos, end_pos, grid)
         pygame.display.update()
         while True:

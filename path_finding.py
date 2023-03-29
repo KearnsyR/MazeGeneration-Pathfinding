@@ -1,8 +1,8 @@
 import math
-
 import pygame
 from settings import *
 from queue import PriorityQueue
+from display_grid import DisplayGrid
 
 def heuristic(curr_pos, end_pos):
     curr_x, curr_y = curr_pos
@@ -34,6 +34,14 @@ def get_neighbours(grid):
             if x < GRID_SIZE-1 and grid[x+1][y].border_side['West'] == False:
                 grid[x][y].neighbours.append(is_traversable(grid, (x,y), (x+1,y)))
 
+def path(origin, current, grid):
+    while current in origin:
+        current = origin[current]
+        if current.type != START:
+            current.type = PATH
+        renderSquares = DisplayGrid()
+        renderSquares.draw_squares(grid)
+
 def astar(start_pos, end_pos, grid):
     count = 0
     open_set = PriorityQueue()
@@ -51,10 +59,27 @@ def astar(start_pos, end_pos, grid):
         open_set_hash.remove(current)
 
         if current == grid[end_pos[0]][end_pos[1]]:
+            path(origin, current, grid)
             return True
 
-        for neighour in current.neighbours:
+        for neighbour_coor in current.neighbours:
             temp_g_score = current.g_score + 1
-            print(neighour)
-            if temp_g_score < grid[neighour[0]][neighour[1]].g_score:
-                pass
+            neighbour_tile = grid[neighbour_coor[0]][neighbour_coor[1]]
+            if temp_g_score < neighbour_tile.g_score:
+                origin[neighbour_tile] = current
+                neighbour_tile.g_score = temp_g_score
+                neighbour_tile.f_score = temp_g_score + heuristic(neighbour_coor, end_pos)
+                if neighbour_tile not in open_set_hash: 
+                    count += 1
+                    open_set.put((neighbour_tile.f_score, count, neighbour_tile))
+                    open_set_hash.add(neighbour_tile)
+                    if neighbour_tile != grid[end_pos[0]][end_pos[1]]:
+                        neighbour_tile.type = OPEN
+
+        if current != grid[start_pos[0]][start_pos[1]]:
+            current.type = CLOSED
+        renderSquares = DisplayGrid()
+        renderSquares.draw_squares(grid)
+
+    return False
+        

@@ -69,7 +69,6 @@ class Maze:
                     self.grid[neighbour_x][neighbour_y].border_side['North'] = False
                 
                 self.renderGrid.display_grid(self.grid)
-                pygame.time.wait(50)
                 tile_stack.append((neighbour_x, neighbour_y))
         start_pos = self.get_pos(start_side)
         end_pos = self.get_pos(opposite_sides[start_side])
