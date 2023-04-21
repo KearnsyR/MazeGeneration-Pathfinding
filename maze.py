@@ -9,18 +9,23 @@ class Maze:
     def __init__(self):
         self.grid = [[Tile(x, y) for y in range(GRID_SIZE)] for x in range(GRID_SIZE)]
         self.renderGrid = DisplayGrid()
+        self.maze_algorithm = 'Recursive Backtracker'
+        self.start_side = random.choice(['North', 'South', 'East', 'West'])
+        self.opposite_sides = {'North': 'South', 'South': 'North', 'East': 'West', 'West': 'East'}
 
-    def get_unvisited_neighbours(self, x, y):
-        neighbours = []
-        if y > 0 and all(self.grid[x][y-1].border_side.values()): # Gets neighbour to the North
-            neighbours.append((x, y-1))
-        if y < GRID_SIZE - 1 and all(self.grid[x][y+1].border_side.values()): # Gets neighbour to the South
-            neighbours.append((x, y+1))
-        if x < GRID_SIZE - 1 and all(self.grid[x+1][y].border_side.values()): # Gets neighbour to East
-            neighbours.append((x+1, y))
-        if x > 0 and all(self.grid[x-1][y].border_side.values()): # Gets neighbour to West
-            neighbours.append((x-1, y))
-        return neighbours
+        self.maze_algorithms = {
+            'Recursive Backtracker': self.generate_recursive_backtracker,
+        }
+
+    def set_maze_algorithm(self, algorithm):
+        self.maze_algorithm = algorithm
+
+    def generate_maze(self):
+        grid = self.maze_algorithms[self.maze_algorithm]()
+        start_pos = self.get_pos(self.start_side)
+        end_pos = self.get_pos(self.opposite_sides[self.start_side])
+        self.renderGrid.display_grid(self.grid)
+        return start_pos, end_pos, grid
     
     def get_pos(self, side):
         x = random.randint(0, GRID_SIZE-1)
@@ -37,13 +42,23 @@ class Maze:
         elif side == 'West':
             self.grid[0][x].border_side['West'] = False
             return (0, x)
+
+    def get_unvisited_neighbours(self, x, y):
+        neighbours = []
+        if y > 0 and all(self.grid[x][y-1].border_side.values()): # Gets neighbour to the North
+            neighbours.append((x, y-1))
+        if y < GRID_SIZE - 1 and all(self.grid[x][y+1].border_side.values()): # Gets neighbour to the South
+            neighbours.append((x, y+1))
+        if x < GRID_SIZE - 1 and all(self.grid[x+1][y].border_side.values()): # Gets neighbour to East
+            neighbours.append((x+1, y))
+        if x > 0 and all(self.grid[x-1][y].border_side.values()): # Gets neighbour to West
+            neighbours.append((x-1, y))
+        return neighbours
     
-    def generate_maze(self):
+    def generate_recursive_backtracker(self):
         self.renderGrid.display_grid(self.grid)
         tile_stack = [(random.randint(0, GRID_SIZE-1), random.randint(0, GRID_SIZE-1))]
         visited_tile = set()
-        start_side = random.choice(['North', 'South', 'East', 'West'])
-        opposite_sides = {'North': 'South', 'South': 'North', 'East': 'West', 'West': 'East'}
         
         while tile_stack:
             for event in pygame.event.get():
@@ -70,7 +85,4 @@ class Maze:
                 
                 self.renderGrid.display_grid(self.grid)
                 tile_stack.append((neighbour_x, neighbour_y))
-        start_pos = self.get_pos(start_side)
-        end_pos = self.get_pos(opposite_sides[start_side])
-        self.renderGrid.display_grid(self.grid)
-        return start_pos, end_pos, self.grid
+        return self.grid
