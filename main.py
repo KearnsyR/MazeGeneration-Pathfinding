@@ -16,7 +16,6 @@ class Game:
         self.end_game = pygame_gui.UIManager((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.current_maze_algorithm = "Recursive Backtracker"
         self.current_pathfinding_algorithm = "A*"
-        self.maze = Maze()
 
     def create_ui_elements(self):
         self.maze_algorithm_dropdown = pygame_gui.elements.UIDropDownMenu(
@@ -58,7 +57,8 @@ class Game:
         )
 
     def start(self):
-        start_pos, end_pos, grid = self.maze.generate_maze()
+        maze = Maze(self.current_maze_algorithm)
+        start_pos, end_pos, grid = maze.generate_maze()
         pathfinding = Pathfinding(grid, start_pos, end_pos, self.current_pathfinding_algorithm)
         grid[start_pos[0]][start_pos[1]].type = START
         grid[end_pos[0]][end_pos[1]].type = END
@@ -80,12 +80,9 @@ class Game:
                 self.end_game.process_events(event)
                 if event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == self.restart_button:
-                        self.maze = Maze()
-                        self.maze.set_maze_algorithm = self.current_maze_algorithm
                         self.screen.fill((0,0,0))
                         self.start()
                     elif event.ui_element == self.new_button:
-                        self.maze = Maze()
                         return False
                     elif event.ui_element == self.quit_button:
                         pygame.quit()
@@ -110,10 +107,8 @@ class Game:
                     if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                         if event.ui_element == self.maze_algorithm_dropdown:
                             self.current_maze_algorithm = event.text
-                            print("event.text: " + event.text + " | self.current_maze_algorithm function: " + self.current_maze_algorithm)
                         elif event.ui_element == self.pathfinding_algorithm_dropdown:
                             self.current_pathfinding_algorithm = event.text
-                            print("event.text: " + event.text + " | self.current_pathfinding_algorithm function: " + self.current_pathfinding_algorithm)
                     elif event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                         if event.ui_element == self.start_button:
                             self.start()

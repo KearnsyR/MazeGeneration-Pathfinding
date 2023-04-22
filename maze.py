@@ -1,3 +1,4 @@
+import heapq
 import random
 
 import pygame
@@ -6,21 +7,23 @@ from tile import Tile
 from display_grid import DisplayGrid
 
 class Maze:
-    def __init__(self):
+    def __init__(self, maze_algorithm):
         self.grid = [[Tile(x, y) for y in range(GRID_SIZE)] for x in range(GRID_SIZE)]
         self.renderGrid = DisplayGrid()
-        self.maze_algorithm = 'Recursive Backtracker'
+        self.maze_algorithm = maze_algorithm
         self.start_side = random.choice(['North', 'South', 'East', 'West'])
         self.opposite_sides = {'North': 'South', 'South': 'North', 'East': 'West', 'West': 'East'}
 
         self.maze_algorithms = {
             'Recursive Backtracker': self.generate_recursive_backtracker,
+            'Prim\'s Algorithm': self.generate_prim,
         }
 
     def set_maze_algorithm(self, algorithm):
         self.maze_algorithm = algorithm
 
     def generate_maze(self):
+        print(self.maze_algorithm)
         grid = self.maze_algorithms[self.maze_algorithm]()
         start_pos = self.get_pos(self.start_side)
         end_pos = self.get_pos(self.opposite_sides[self.start_side])
@@ -85,4 +88,49 @@ class Maze:
                 
                 self.renderGrid.display_grid(self.grid)
                 tile_stack.append((neighbour_x, neighbour_y))
+        return self.grid
+    
+    def generate_prim(self):
+        self.renderGrid.display_grid(self.grid)
+
+        visited = set()
+        frontier = set()
+        start_x, start_y = self.get_pos(self.start_side)
+        visited.add((start_x, start_y))
+        for neighbour_x, neighbour_y in self.get_unvisited_neighbours(start_x, start_y):
+            frontier.add((neighbour_x, neighbour_y))
+
+        while frontier:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+            x, y = random.choice(list(frontier))
+            frontier.remove((x, y))
+
+            candidates = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+            random.shuffle(candidates)
+            for neighbour_x, neighbour_y in candidates:
+                if (neighbour_x, neighbour_y) in visited:
+                    if neighbour_x < x:
+                        self.grid[x][y].border_side['West'] = False
+                        self.grid[neighbour_x][neighbour_y].border_side['East'] = False
+                    elif neighbour_x > x:
+                        self.grid[x][y].border_side['East'] = False
+                        self.grid[neighbour_x][neighbour_y].border_side['West'] = False
+                    elif neighbour_y < y:
+                        self.grid[x][y].border_side['North'] = False
+                        self.grid[neighbour_x][neighbour_y].border_side['South'] = False
+                    elif neighbour_y > y:
+                        self.grid[x][y].border_side['South'] = False
+                        self.grid[neighbour_x][neighbour_y].border_side['North'] = False
+
+                    visited.add((x, y))
+                    for neighbour_x, neighbour_y in self.get_unvisited_neighbours(x, y):
+                        if (neighbour_x, neighbour_y) not in visited:
+                            frontier.add((neighbour_x, neighbour_y))
+
+                    self.renderGrid.display_grid(self.grid)
+                    break
+            else:
+                continue
         return self.grid
