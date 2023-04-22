@@ -6,11 +6,15 @@ from queue import PriorityQueue, Queue
 from display_grid import DisplayGrid
 
 class Pathfinding:
-    def __init__(self, grid, start_pos, end_pos, pathfinding_algorithm):
+    def __init__(self, grid, start_pos, end_pos, pathfinding_algorithm, grid_size, starting_coordinate, tile_size):
         self.grid = grid
         self.start_pos = start_pos
         self.end_pos = end_pos
         self.pathfinding_algorithm = pathfinding_algorithm
+        self.grid_size = grid_size
+        self.starting_coordinate = starting_coordinate
+        self.tile_size = tile_size
+        self.renderGrid = DisplayGrid(self.grid_size, self.starting_coordinate, tile_size)
 
         self.pathfinding_algorithms = {
             'A*': self.solve_astar,
@@ -46,24 +50,29 @@ class Pathfinding:
             return None
 
     def get_neighbours(self):
-        for x in range(GRID_SIZE):
-            for y in range(GRID_SIZE):
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
                 if y > 0 and self.grid[x][y-1].border_side['South'] == False:
                     self.grid[x][y].neighbours.append(self.is_traversable(self.grid, (x,y), (x,y-1)))
-                if y < GRID_SIZE-1 and self.grid[x][y+1].border_side['North'] == False:
+                if y < self.grid_size-1 and self.grid[x][y+1].border_side['North'] == False:
                     self.grid[x][y].neighbours.append(self.is_traversable(self.grid, (x,y), (x,y+1)))
                 if x > 0 and self.grid[x-1][y].border_side['East'] == False:
                     self.grid[x][y].neighbours.append(self.is_traversable(self.grid, (x,y), (x-1,y)))
-                if x < GRID_SIZE-1 and self.grid[x+1][y].border_side['West'] == False:
+                if x < self.grid_size-1 and self.grid[x+1][y].border_side['West'] == False:
                     self.grid[x][y].neighbours.append(self.is_traversable(self.grid, (x,y), (x+1,y)))
 
     def path(self, origin, current, grid):
-        while current in origin:
+        print("Inside path function")
+        while current in origin.keys():
             current = origin[current]
-            if current.type != START:
+            print(f"Backtracking to tile ({current.x}, {current.y})")
+            if current != self.grid[self.start_pos[0]][self.start_pos[1]]:
                 current.type = PATH
-            renderSquares = DisplayGrid()
-            renderSquares.draw_squares(grid)
+                print(f"Setting tile ({current.x}, {current.y}) as PATH")
+            else:
+                return
+            self.renderGrid.draw_squares(grid)
+        print("Finished pathfinding")
 
     def solve_dijkstra(self):
         count = 0
@@ -100,17 +109,17 @@ class Pathfinding:
 
             if current != self.grid[self.start_pos[0]][self.start_pos[1]]:
                 current.type = CLOSED
-            renderSquares = DisplayGrid()
-            renderSquares.draw_squares(self.grid)
+            self.renderGrid.draw_squares(self.grid)
 
         return False
     
     def solve_bfs(self):
         open_set = Queue()
-        open_set.put(self.grid[self.start_pos[0]][self.start_pos[1]])
-        origin = {}
+        start_tile = self.grid[self.start_pos[0]][self.start_pos[1]]
+        open_set.put(start_tile)
+        origin = {start_tile: None}  # add the start tile to the origin dictionary with a value of None
         self.get_neighbours()
-        open_set_hash = {self.grid[self.start_pos[0]][self.start_pos[1]]}
+        open_set_hash = {start_tile}
 
         while not open_set.empty():
             for event in pygame.event.get():
@@ -123,7 +132,7 @@ class Pathfinding:
                 self.path(origin, current, self.grid)
                 return True
 
-            if current.type == CLOSED:
+            if current.type == CLOSED and current != start_tile:
                 continue
 
             for neighbour_coor in current.neighbours:
@@ -134,13 +143,15 @@ class Pathfinding:
                     origin[neighbour_tile] = current
                     open_set.put(neighbour_tile)
                     open_set_hash.add(neighbour_tile)
-                    neighbour_tile.type = OPEN
+                    if neighbour_tile != self.grid[self.end_pos[0]][self.end_pos[1]] and neighbour_tile != start_tile:
+                        neighbour_tile.type = OPEN
+                if neighbour_tile == self.grid[self.end_pos[0]][self.end_pos[1]]:
+                    neighbour_tile.type = END
 
-            current.type = CLOSED
-            renderSquares = DisplayGrid()
-            renderSquares.draw_squares(self.grid)
+            if current != start_tile:
+                current.type = CLOSED
 
-        return False
+            self.renderGrid.draw_squares(self.grid)
 
     def solve_astar(self):
         count = 0
@@ -179,8 +190,7 @@ class Pathfinding:
 
             if current != self.grid[self.start_pos[0]][self.start_pos[1]]:
                 current.type = CLOSED
-            renderSquares = DisplayGrid()
-            renderSquares.draw_squares(self.grid)
+            self.renderGrid.draw_squares(self.grid)
 
         return False
             

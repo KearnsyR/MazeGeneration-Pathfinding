@@ -4,7 +4,6 @@ import pygame_gui
 from maze import Maze
 from path_finding import Pathfinding
 from settings import *
-from tile import Tile
 
 class Game:
     def __init__(self):
@@ -16,19 +15,29 @@ class Game:
         self.end_game = pygame_gui.UIManager((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.current_maze_algorithm = "Recursive Backtracker"
         self.current_pathfinding_algorithm = "A*"
+        self.grid_size = 10
+        self.tile_size = 500 / self.grid_size
+        self.starting_coordinate = (SCREEN_WIDTH - (self.grid_size * self.tile_size)) / 2
 
     def create_ui_elements(self):
+        self.maze_size_dropdown = pygame_gui.elements.UIDropDownMenu(
+            options_list=['10', '20', '30'],
+            starting_option='10',
+            relative_rect=pygame.Rect((10, 10), (200, 30)),
+            manager=self.main_menu
+        )
+        
         self.maze_algorithm_dropdown = pygame_gui.elements.UIDropDownMenu(
             options_list=['Recursive Backtracker', 'Prim\'s Algorithm', 'Kruskal\'s Algorithm'],
             starting_option='Recursive Backtracker',
-            relative_rect=pygame.Rect((10, 10), (200, 30)),
+            relative_rect=pygame.Rect((10, 50), (200, 30)),
             manager=self.main_menu
         )
 
         self.pathfinding_algorithm_dropdown = pygame_gui.elements.UIDropDownMenu(
             options_list=['A*', 'Dijkstras', 'Breadth-First Search'],
             starting_option='A*',
-            relative_rect=pygame.Rect((10, 50), (200, 30)),
+            relative_rect=pygame.Rect((10, 90), (200, 30)),
             manager=self.main_menu
         )
 
@@ -57,9 +66,9 @@ class Game:
         )
 
     def start(self):
-        maze = Maze(self.current_maze_algorithm)
+        maze = Maze(self.current_maze_algorithm, self.grid_size, self.starting_coordinate, self.tile_size)
         start_pos, end_pos, grid = maze.generate_maze()
-        pathfinding = Pathfinding(grid, start_pos, end_pos, self.current_pathfinding_algorithm)
+        pathfinding = Pathfinding(grid, start_pos, end_pos, self.current_pathfinding_algorithm, self.grid_size, self.starting_coordinate, self.tile_size)
         grid[start_pos[0]][start_pos[1]].type = START
         grid[end_pos[0]][end_pos[1]].type = END
         pathfinding.find_path()
@@ -109,6 +118,9 @@ class Game:
                             self.current_maze_algorithm = event.text
                         elif event.ui_element == self.pathfinding_algorithm_dropdown:
                             self.current_pathfinding_algorithm = event.text
+                        elif event.ui_element == self.maze_size_dropdown:
+                            self.grid_size = int(event.text)
+                            self.tile_size = 500 / self.grid_size
                     elif event.type == pygame.USEREVENT and event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                         if event.ui_element == self.start_button:
                             self.start()

@@ -6,9 +6,12 @@ from tile import Tile
 from display_grid import DisplayGrid
 
 class Maze:
-    def __init__(self, maze_algorithm):
-        self.grid = [[Tile(x, y) for y in range(GRID_SIZE)] for x in range(GRID_SIZE)]
-        self.renderGrid = DisplayGrid()
+    def __init__(self, maze_algorithm, grid_size, starting_coordinate, tile_size):
+        self.grid_size = grid_size
+        self.grid = [[Tile(x, y) for y in range(grid_size)] for x in range(self.grid_size)]
+        self.starting_coordinate = starting_coordinate
+        self.tile_size = tile_size
+        self.renderGrid = DisplayGrid(self.grid_size, self.starting_coordinate, tile_size)
         self.maze_algorithm = maze_algorithm
         self.start_side = random.choice(['North', 'South', 'East', 'West'])
         self.opposite_sides = {'North': 'South', 'South': 'North', 'East': 'West', 'West': 'East'}
@@ -34,17 +37,17 @@ class Maze:
         return start_pos, end_pos, grid
     
     def get_pos(self, side):
-        x = random.randint(0, GRID_SIZE-1)
-        y = random.randint(0, GRID_SIZE-1)
+        x = random.randint(0, self.grid_size-1)
+        y = random.randint(0, self.grid_size-1)
         if side == 'North':
             self.grid[y][0].border_side['North'] = False
             return (y, 0)
         elif side == 'South':
-            self.grid[y][GRID_SIZE-1].border_side['South'] = False
-            return (y, GRID_SIZE-1)
+            self.grid[y][self.grid_size-1].border_side['South'] = False
+            return (y, self.grid_size-1)
         elif side == 'East':
-            self.grid[GRID_SIZE-1][x].border_side['East'] = False
-            return (GRID_SIZE-1, x)
+            self.grid[self.grid_size-1][x].border_side['East'] = False
+            return (self.grid_size-1, x)
         elif side == 'West':
             self.grid[0][x].border_side['West'] = False
             return (0, x)
@@ -53,9 +56,9 @@ class Maze:
         neighbours = []
         if y > 0 and all(self.grid[x][y-1].border_side.values()): # Gets neighbour to the North
             neighbours.append((x, y-1))
-        if y < GRID_SIZE - 1 and all(self.grid[x][y+1].border_side.values()): # Gets neighbour to the South
+        if y < self.grid_size - 1 and all(self.grid[x][y+1].border_side.values()): # Gets neighbour to the South
             neighbours.append((x, y+1))
-        if x < GRID_SIZE - 1 and all(self.grid[x+1][y].border_side.values()): # Gets neighbour to East
+        if x < self.grid_size - 1 and all(self.grid[x+1][y].border_side.values()): # Gets neighbour to East
             neighbours.append((x+1, y))
         if x > 0 and all(self.grid[x-1][y].border_side.values()): # Gets neighbour to West
             neighbours.append((x-1, y))
@@ -63,7 +66,7 @@ class Maze:
     
     def generate_recursive_backtracker(self):
         self.renderGrid.display_grid(self.grid)
-        tile_stack = [(random.randint(0, GRID_SIZE-1), random.randint(0, GRID_SIZE-1))]
+        tile_stack = [(random.randint(0, self.grid_size-1), random.randint(0, self.grid_size-1))]
         visited_tile = set()
         
         while tile_stack:
@@ -141,9 +144,9 @@ class Maze:
     def generate_kruskal(self):
         self.renderGrid.display_grid(self.grid)
         edges = []
-        sets = [[(x,y)] for x in range(GRID_SIZE) for y in range(GRID_SIZE)]
-        for x in range(GRID_SIZE):
-            for y in range(GRID_SIZE):
+        sets = [[(x,y)] for x in range(self.grid_size) for y in range(self.grid_size)]
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
                 if y > 0:
                     edges.append(((x,y), (x,y-1)))
                 if x > 0:
