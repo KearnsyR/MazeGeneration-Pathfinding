@@ -62,17 +62,13 @@ class Pathfinding:
                     self.grid[x][y].neighbours.append(self.is_traversable(self.grid, (x,y), (x+1,y)))
 
     def path(self, origin, current, grid):
-        print("Inside path function")
         while current in origin.keys():
             current = origin[current]
-            print(f"Backtracking to tile ({current.x}, {current.y})")
             if current != self.grid[self.start_pos[0]][self.start_pos[1]]:
                 current.type = PATH
-                print(f"Setting tile ({current.x}, {current.y}) as PATH")
             else:
                 return
             self.renderGrid.draw_squares(grid)
-        print("Finished pathfinding")
 
     def solve_dijkstra(self):
         count = 0
@@ -117,7 +113,7 @@ class Pathfinding:
         open_set = Queue()
         start_tile = self.grid[self.start_pos[0]][self.start_pos[1]]
         open_set.put(start_tile)
-        origin = {start_tile: None}  # add the start tile to the origin dictionary with a value of None
+        origin = {start_tile: None}
         self.get_neighbours()
         open_set_hash = {start_tile}
 
