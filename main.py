@@ -19,14 +19,14 @@ class Game:
 
     def create_ui_elements(self):
         self.maze_algorithm_dropdown = pygame_gui.elements.UIDropDownMenu(
-            options_list=['Recursive Backtracker', 'Prim\'s Algorithm'],
+            options_list=['Recursive Backtracker', 'Prim\'s Algorithm', 'Kruskal\'s Algorithm'],
             starting_option='Recursive Backtracker',
             relative_rect=pygame.Rect((10, 10), (200, 30)),
             manager=self.main_menu
         )
 
         self.pathfinding_algorithm_dropdown = pygame_gui.elements.UIDropDownMenu(
-            options_list=['A*', 'Dijkstras'],
+            options_list=['A*', 'Dijkstras', 'Breadth-First Search'],
             starting_option='A*',
             relative_rect=pygame.Rect((10, 50), (200, 30)),
             manager=self.main_menu

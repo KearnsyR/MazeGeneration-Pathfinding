@@ -1,12 +1,8 @@
-import math
-import sys
 import pygame
 import heapq
-
-import pygame_gui
-from maze import Maze
+import time
 from settings import *
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 from display_grid import DisplayGrid
 
 class Pathfinding:
@@ -18,14 +14,16 @@ class Pathfinding:
 
         self.pathfinding_algorithms = {
             'A*': self.solve_astar,
-            'Dijkstras': self.solve_dijkstra
+            'Dijkstras': self.solve_dijkstra,
+            'Breadth-First Search': self.solve_bfs,
         }
     
     def find_path(self):
-        if self.pathfinding_algorithm == "A*":
-            return self.solve_astar()
-        elif self.pathfinding_algorithm == "Dijkstras":
-            return self.solve_dijkstra()
+        start_time = time.time()
+        self.pathfinding_algorithms[self.pathfinding_algorithm]()
+        end_time = time.time()
+        print(f"The current algorithm is {self.pathfinding_algorithm}")
+        print(f"Pathfinding time taken: {end_time - start_time:.3f} seconds")
 
     def heuristic(self, curr_pos, end_pos):
         curr_x, curr_y = curr_pos
@@ -44,6 +42,8 @@ class Pathfinding:
             side = 'South'
         if grid[curr_pos[0]][curr_pos[1]].border_side[side] == False and grid[neighbour_pos[0]][neighbour_pos[1]].border_side[opposite_sides[side]] == False:
             return neighbour_pos
+        else:
+            return None
 
     def get_neighbours(self):
         for x in range(GRID_SIZE):
@@ -100,6 +100,43 @@ class Pathfinding:
 
             if current != self.grid[self.start_pos[0]][self.start_pos[1]]:
                 current.type = CLOSED
+            renderSquares = DisplayGrid()
+            renderSquares.draw_squares(self.grid)
+
+        return False
+    
+    def solve_bfs(self):
+        open_set = Queue()
+        open_set.put(self.grid[self.start_pos[0]][self.start_pos[1]])
+        origin = {}
+        self.get_neighbours()
+        open_set_hash = {self.grid[self.start_pos[0]][self.start_pos[1]]}
+
+        while not open_set.empty():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+            current = open_set.get()
+            open_set_hash.remove(current)
+
+            if current == self.grid[self.end_pos[0]][self.end_pos[1]]:
+                self.path(origin, current, self.grid)
+                return True
+
+            if current.type == CLOSED:
+                continue
+
+            for neighbour_coor in current.neighbours:
+                neighbour_tile = self.grid[neighbour_coor[0]][neighbour_coor[1]]
+                if neighbour_tile == current or neighbour_tile.type == CLOSED:
+                    continue
+                if neighbour_tile not in open_set_hash:
+                    origin[neighbour_tile] = current
+                    open_set.put(neighbour_tile)
+                    open_set_hash.add(neighbour_tile)
+                    neighbour_tile.type = OPEN
+
+            current.type = CLOSED
             renderSquares = DisplayGrid()
             renderSquares.draw_squares(self.grid)
 

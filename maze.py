@@ -1,6 +1,5 @@
-import heapq
 import random
-
+import time
 import pygame
 from settings import *
 from tile import Tile
@@ -17,17 +16,21 @@ class Maze:
         self.maze_algorithms = {
             'Recursive Backtracker': self.generate_recursive_backtracker,
             'Prim\'s Algorithm': self.generate_prim,
+            'Kruskal\'s Algorithm': self.generate_kruskal,
         }
 
     def set_maze_algorithm(self, algorithm):
         self.maze_algorithm = algorithm
 
     def generate_maze(self):
-        print(self.maze_algorithm)
+        start_time = time.time()
         grid = self.maze_algorithms[self.maze_algorithm]()
         start_pos = self.get_pos(self.start_side)
         end_pos = self.get_pos(self.opposite_sides[self.start_side])
         self.renderGrid.display_grid(self.grid)
+        end_time = time.time()
+        print(f"The current algorithm is {self.maze_algorithm}")
+        print(f"Maze Generation time taken: {end_time - start_time:.3f} seconds")
         return start_pos, end_pos, grid
     
     def get_pos(self, side):
@@ -133,4 +136,47 @@ class Maze:
                     break
             else:
                 continue
+        return self.grid
+    
+    def generate_kruskal(self):
+        self.renderGrid.display_grid(self.grid)
+        edges = []
+        sets = [[(x,y)] for x in range(GRID_SIZE) for y in range(GRID_SIZE)]
+        for x in range(GRID_SIZE):
+            for y in range(GRID_SIZE):
+                if y > 0:
+                    edges.append(((x,y), (x,y-1)))
+                if x > 0:
+                    edges.append(((x,y), (x-1,y)))
+        random.shuffle(edges)
+
+        for edge in edges:
+            (x1,y1), (x2,y2) = edge
+            set1 = None
+            set2 = None
+            for s in sets:
+                if (x1,y1) in s:
+                    set1 = s
+                if (x2,y2) in s:
+                    set2 = s
+            if set1 != set2:
+                if x1 == x2:
+                    if y1 > y2:
+                        self.grid[x1][y1].border_side['North'] = False
+                        self.grid[x2][y2].border_side['South'] = False
+                    else:
+                        self.grid[x1][y1].border_side['South'] = False
+                        self.grid[x2][y2].border_side['North'] = False
+                else:
+                    if x1 > x2:
+                        self.grid[x1][y1].border_side['West'] = False
+                        self.grid[x2][y2].border_side['East'] = False
+                    else:
+                        self.grid[x1][y1].border_side['East'] = False
+                        self.grid[x2][y2].border_side['West'] = False
+                set1.extend(set2)
+                sets.remove(set2)
+
+            self.renderGrid.display_grid(self.grid)
+
         return self.grid
