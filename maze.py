@@ -32,9 +32,7 @@ class Maze:
         end_pos = self.get_pos(self.opposite_sides[self.start_side])
         self.renderGrid.display_grid(self.grid)
         end_time = time.time()
-        print(f"The current algorithm is {self.maze_algorithm}")
-        print(f"Maze Generation time taken: {end_time - start_time:.3f} seconds")
-        return start_pos, end_pos, grid
+        return start_pos, end_pos, grid, (end_time - start_time)
     
     def get_pos(self, side):
         x = random.randint(0, self.grid_size-1)
@@ -54,13 +52,13 @@ class Maze:
 
     def get_unvisited_neighbours(self, x, y):
         neighbours = []
-        if y > 0 and all(self.grid[x][y-1].border_side.values()): # Gets neighbour to the North
+        if y > 0 and all(self.grid[x][y-1].border_side.values()):
             neighbours.append((x, y-1))
-        if y < self.grid_size - 1 and all(self.grid[x][y+1].border_side.values()): # Gets neighbour to the South
+        if y < self.grid_size - 1 and all(self.grid[x][y+1].border_side.values()):
             neighbours.append((x, y+1))
-        if x < self.grid_size - 1 and all(self.grid[x+1][y].border_side.values()): # Gets neighbour to East
+        if x < self.grid_size - 1 and all(self.grid[x+1][y].border_side.values()):
             neighbours.append((x+1, y))
-        if x > 0 and all(self.grid[x-1][y].border_side.values()): # Gets neighbour to West
+        if x > 0 and all(self.grid[x-1][y].border_side.values()):
             neighbours.append((x-1, y))
         return neighbours
     

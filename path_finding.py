@@ -26,8 +26,7 @@ class Pathfinding:
         start_time = time.time()
         self.pathfinding_algorithms[self.pathfinding_algorithm]()
         end_time = time.time()
-        print(f"The current algorithm is {self.pathfinding_algorithm}")
-        print(f"Pathfinding time taken: {end_time - start_time:.3f} seconds")
+        return (end_time - start_time)
 
     def heuristic(self, curr_pos, end_pos):
         curr_x, curr_y = curr_pos

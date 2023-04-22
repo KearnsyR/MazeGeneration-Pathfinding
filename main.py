@@ -1,6 +1,7 @@
 import pygame
 import sys
 import pygame_gui
+import csv
 from maze import Maze
 from path_finding import Pathfinding
 from settings import *
@@ -47,31 +48,38 @@ class Game:
             manager=self.main_menu
         )
 
-        self.restart_button = pygame_gui.elements.UIButton(
+        self.simulate_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((SCREEN_WIDTH - 110, SCREEN_HEIGHT - 90), (100, 30)),
+            text='Simulate',
+            manager=self.main_menu
+        )
+
+        self.restart_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((SCREEN_WIDTH - 110, SCREEN_HEIGHT - 40), (100, 30)),
             text='Restart',
             manager=self.end_game
         )
 
         self.new_button = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((SCREEN_WIDTH - 110, SCREEN_HEIGHT - 140), (100, 30)),
+            relative_rect=pygame.Rect((SCREEN_WIDTH - 110, SCREEN_HEIGHT - 90), (100, 30)),
             text='New',
             manager=self.end_game
         )
 
         self.quit_button = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((SCREEN_WIDTH - 110, SCREEN_HEIGHT - 190), (100, 30)),
+            relative_rect=pygame.Rect((SCREEN_WIDTH - 110, SCREEN_HEIGHT - 140), (100, 30)),
             text='Quit',
             manager=self.end_game
         )
 
     def start(self):
         maze = Maze(self.current_maze_algorithm, self.grid_size, self.starting_coordinate, self.tile_size)
-        start_pos, end_pos, grid = maze.generate_maze()
+        start_pos, end_pos, grid, maze_time = maze.generate_maze()
         pathfinding = Pathfinding(grid, start_pos, end_pos, self.current_pathfinding_algorithm, self.grid_size, self.starting_coordinate, self.tile_size)
         grid[start_pos[0]][start_pos[1]].type = START
         grid[end_pos[0]][end_pos[1]].type = END
-        pathfinding.find_path()
+        pathfinding_time = pathfinding.find_path()
+        return maze_time, pathfinding_time
 
     def complete(self, time_delta):
         while True:
@@ -125,6 +133,23 @@ class Game:
                         if event.ui_element == self.start_button:
                             self.start()
                             self.complete(time_delta)
+                        elif event.ui_element == self.simulate_button:
+                            with open('output.csv', 'w', newline='') as csvfile:
+                                writer = csv.writer(csvfile)
+                                writer.writerow(['Test Number', 'Maze Size', 'Maze Algorithm', 'Pathfinding Algorithm', 'Maze Time', 'Pathfinding Time'])
+                                for maze_size in self.maze_size_dropdown.options_list:
+                                    for maze_algorithm in self.maze_algorithm_dropdown.options_list:
+                                        for pathfinding_algorithm in self.pathfinding_algorithm_dropdown.options_list:
+                                            for test_num in range(100):
+                                                self.grid_size = int(maze_size)
+                                                self.tile_size = 500 / self.grid_size
+                                                self.current_maze_algorithm = maze_algorithm
+                                                self.current_pathfinding_algorithm = pathfinding_algorithm
+                                                self.screen.fill((0,0,0))
+                                                maze_time, pathfinding_time = self.start()
+                                                writer.writerow([maze_size, maze_algorithm, pathfinding_algorithm, round(maze_time, 3), round(pathfinding_time, 3)])
+                                
+                            
 
             self.main_menu.update(time_delta)
 
